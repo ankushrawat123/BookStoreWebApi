@@ -13,7 +13,7 @@ namespace BuisnessLayer.Interface
 
         Task<string> UserLogin(string Email, string Password);
 
-        Task<Register> ResetPassword(PasswordPostModel passwordPostModel);
+        Task<bool> ResetPassword(string email, PasswordPostModel passwordPostModel);
 
         Task<bool> ForgetPassword(string Email);
     }

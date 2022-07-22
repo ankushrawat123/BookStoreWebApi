@@ -29,11 +29,12 @@ namespace BuisnessLayer.Service
             }
         }
 
-        public async Task<Register> ResetPassword(PasswordPostModel passwordPostModel)
+      
+        public async Task<bool> ResetPassword(string email, PasswordPostModel passwordPostModel)
         {
             try
             {
-                return await this.userRL.ResetPassword(passwordPostModel);
+                return await this.userRL.ResetPassword(email,passwordPostModel);
             }
             catch (Exception e)
             {

@@ -2,8 +2,12 @@
 using DatabaseLayer.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
+using RepositoryLayer.Interface;
 using RepositoryLayer.Service.Entity;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BookstoreApi.Controllers
@@ -13,9 +17,22 @@ namespace BookstoreApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserBL userBL;
-        public UserController(IUserBL userBL)
+
+
+        private readonly IMongoCollection<Register> _user;
+        private readonly IConfiguration configuration;
+
+     
+
+
+
+        public UserController(IUserBL userBL, IConfig _config, IConfiguration configuration)
         {
             this.userBL = userBL;
+            this.configuration = configuration;
+            var userclient = new MongoClient(_config.ConnectionString);
+            var database = userclient.GetDatabase(_config.DatabaseName);
+            _user = database.GetCollection<Register>("_user");
         }
       
         [HttpPost]
@@ -77,15 +94,34 @@ namespace BookstoreApi.Controllers
         {
             try
             {
-                var user = await this.userBL.ResetPassword(passwordPostModel);
-                if(user != null)
+                var userid = User.Claims.FirstOrDefault(x => x.Type.ToString().Equals("userid", StringComparison.InvariantCultureIgnoreCase));
+                string UserID = userid.Value;
+                var result = _user.AsQueryable().Where(u => u.UserId == UserID).FirstOrDefault();
+                string Email = result.EmailId.ToString();
+                if (passwordPostModel.Password != passwordPostModel.ConfirmPassword)
                 {
-                    return this.Ok(new { status=true,Message="Password Reset Successfull", });
+                    return BadRequest(new { success = false, message = "Password and ConfirmPassword must be same" });
                 }
-                else
+
+                bool res = await this.userBL.ResetPassword(Email,passwordPostModel);
+
+                if (res == false)
                 {
-                    return BadRequest(new { status = false, Message = "Email Is Not Registered, Please Registered It" });
+                    return this.BadRequest(new { success = false, message = "Enter the valid Email" });
                 }
+                return this.Ok(new { success = true, message = "Password Update Successfull" });
+
+
+
+                //var user = await this.userBL.ResetPassword(passwordPostModel);
+                //if(user != null)
+                //{
+                //    return this.Ok(new { status=true,Message="Password Reset Successfull", });
+                //}
+                //else
+                //{
+                //    return BadRequest(new { status = false, Message = "Email Is Not Registered, Please Registered It" });
+                //}
             }
             catch (Exception e)
             {

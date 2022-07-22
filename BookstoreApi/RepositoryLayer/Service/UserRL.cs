@@ -35,8 +35,9 @@ namespace RepositoryLayer.Service
         {
             try
             {
-                var check = _user.AsQueryable().Where(x => x.EmailId == Email).FirstOrDefaultAsync();
 
+                var check = await _user.AsQueryable().Where(x => x.EmailId == Email).FirstOrDefaultAsync();
+                var userid = check.UserId;
                 if (check == null)
                 {
                     return false;
@@ -57,7 +58,7 @@ namespace RepositoryLayer.Service
 
                     Message MyMessage = new Message();
                     MyMessage.Formatter = new BinaryMessageFormatter();
-                    MyMessage.Body = GenerateJwtToken(Email);
+                    MyMessage.Body = GenerateJwtToken(Email,userid);
                     MyMessage.Label = "Forget Password Email";
                     queue.Send(MyMessage);
 
@@ -80,28 +81,34 @@ namespace RepositoryLayer.Service
             }
         }
 
-        public async Task<Register> ResetPassword(PasswordPostModel passwordPostModel)
+        public async Task<bool> ResetPassword(string email,PasswordPostModel passwordPostModel)
         {
+
             try
             {
-               var check= await this._user.AsQueryable().Where(x => x.EmailId == passwordPostModel.EmailId).FirstOrDefaultAsync();
+                var check = await this._user.AsQueryable().Where(x => x.EmailId == email).FirstOrDefaultAsync();
 
-                if (check!=null)
+                //var user = fundooContext.Users.Where(u => u.Email == email).FirstOrDefault();
+
+                if (check == null)
                 {
-                 
+                    return false;
+                }
+
+                if (passwordPostModel.Password ==passwordPostModel.ConfirmPassword)
+                {
                     var cnfpwd = PwdEncryptDecryptService.EncryptPassword(passwordPostModel.ConfirmPassword);
                     await this._user.UpdateOneAsync(x => x.EmailId == passwordPostModel.EmailId,
                        Builders<Register>.Update.Set(x => x.Password, cnfpwd));
-
-                    return check;
                 }
-                return null;
 
+                return true;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw e;
             }
+
         }
 
         public async Task<string> UserLogin(string Email, string Password)
@@ -109,19 +116,17 @@ namespace RepositoryLayer.Service
             try
             {
                 var userCheck = await this._user.AsQueryable().Where(u => u.EmailId == Email).FirstOrDefaultAsync();
+                 var userid = userCheck.UserId;
                 if(userCheck!=null)
                 {
                     var password = PwdEncryptDecryptService.DecryptPassword(userCheck.Password);
                     if(password == Password)
                     {
-                        return GenerateJwtToken(Email);
+                        return GenerateJwtToken(Email,userid);
                     }
                     throw new Exception("Password is Invalid");
                 }
                 throw new Exception("Email doesn't Exist");
-
-
-
 
             }
             catch (Exception e)
@@ -157,7 +162,7 @@ namespace RepositoryLayer.Service
             }
         }
 
-        private string GenerateJwtToken(string email)
+        private string GenerateJwtToken(string email, object userId)
         {
             try
             {
@@ -169,7 +174,7 @@ namespace RepositoryLayer.Service
                     Subject = new ClaimsIdentity(new[]
                     {
                     new Claim(ClaimTypes.Email, email),
-                    
+                    new Claim("UserId", userId.ToString())
                     }),
                     Expires = DateTime.UtcNow.AddMinutes(60),
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -239,6 +244,3 @@ namespace RepositoryLayer.Service
 
 
 
-//var currentUser = HttpContext.User;
-//var userid = currentUser.Claims.FirstOrDefault(c => c.Type == "UserId").Value;
-//if (userid == check.UserId)
