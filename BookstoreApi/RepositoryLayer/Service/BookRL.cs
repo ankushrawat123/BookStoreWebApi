@@ -62,7 +62,7 @@ namespace RepositoryLayer.Service
             {
                 var book = await books.AsQueryable().Where(x => x.BookTitle == BookTitle && x.Author == Author).SingleOrDefaultAsync();
                 if (book != null)
-                books.FindOneAndDeleteAsync(x => x.BookTitle == BookTitle && x.Author == Author);
+               await books.FindOneAndDeleteAsync(x => x.BookTitle == BookTitle && x.Author == Author);
              
                     
             }
@@ -125,6 +125,8 @@ namespace RepositoryLayer.Service
                 throw e;
             }
         }
+
+      
     }
 }
 

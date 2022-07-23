@@ -16,6 +16,6 @@ namespace RepositoryLayer.Interface
 
         Task DeleteBook(string BookTitle, string Author);
 
-        Task UpdateBook( BookPostModel bookPostModel);
+        Task UpdateBook(BookPostModel bookPostModel);
     }
 }

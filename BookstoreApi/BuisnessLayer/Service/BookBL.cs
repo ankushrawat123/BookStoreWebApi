@@ -29,17 +29,17 @@ namespace BuisnessLayer.Service
             }
         }
 
-        public async Task UpdateBook( BookPostModel bookPostModel)
-        {
-            try
-            {
-                await this.bookRL.UpdateBook( bookPostModel);
-            }
-            catch(Exception e)
-            {
-                throw e;
-            }
-        }
+        //public async Task UpdateBook( BookPostModel bookPostModel)
+        //{
+        //    try
+        //    {
+        //        await this.bookRL.UpdateBook( bookPostModel);
+        //    }
+        //    catch(Exception e)
+        //    {
+        //        throw e;
+        //    }
+        //}
 
         public async Task DeleteBook(string BookTitle, string Author)
         {
@@ -72,6 +72,19 @@ namespace BuisnessLayer.Service
                 return await this.bookRL.GetBook(BookTitle, Author);
             }
             catch(Exception e)
+            {
+                throw e;
+            }
+        }
+
+        public async Task UpdateBook(BookPostModel bookPostModel)
+        {
+
+            try
+            {
+                await this.bookRL.UpdateBook(bookPostModel);
+            }
+            catch (Exception e)
             {
                 throw e;
             }

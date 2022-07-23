@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 
 namespace BookstoreApi.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class BookController : ControllerBase
     {
         private readonly IBookBL bookBL;

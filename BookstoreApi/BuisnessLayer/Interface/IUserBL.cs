@@ -16,5 +16,7 @@ namespace BuisnessLayer.Interface
         Task<bool> ResetPassword(string email, PasswordPostModel passwordPostModel);
 
         Task<bool> ForgetPassword(string Email);
+
+        
     }
 }
