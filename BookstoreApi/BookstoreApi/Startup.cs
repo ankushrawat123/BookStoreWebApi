@@ -45,7 +45,8 @@ namespace BookstoreApi
             services.AddTransient<IBookRL, BookRL>();
             services.AddTransient<ICartBL, CartBL>();
             services.AddTransient<ICartRL, CartRL>();
-
+            services.AddTransient<IWishListBL, WishListBL>();
+            services.AddTransient<IWishListRL,WishListRL>();
 
             services.AddAuthentication(x =>
             {
