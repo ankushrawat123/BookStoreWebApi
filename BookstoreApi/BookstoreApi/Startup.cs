@@ -38,7 +38,9 @@ namespace BookstoreApi
             services.Configure<Config>(this.Configuration.GetSection(nameof(Config)));
 
             services.AddSingleton<IConfig>(sp =>
-            sp.GetRequiredService<IOptions<Config>>().Value); 
+            sp.GetRequiredService<IOptions<Config>>().Value);
+            services.AddTransient<IAdminBL, AdminBL>();
+            services.AddTransient<IAdminRL, AdminRL>();
             services.AddTransient<IUserBL, UserBL>();
             services.AddTransient<IUserRL,UserRL>();
             services.AddTransient<IBookBL, BookBL>();
@@ -54,6 +56,19 @@ namespace BookstoreApi
             services.AddTransient<IFeedbackBL,FeedbackBL>();
             services.AddTransient<IFeedbackRL,FeedbackRL>();
 
+
+
+            //Role based Authorization
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin",
+                    authBuilder =>
+                    {
+                        authBuilder.RequireRole("Admin");
+                    });
+            });
+
+
             services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -66,6 +81,7 @@ namespace BookstoreApi
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("this is my secret key")),
+                    //IssuerSigningKey = new List<SecurityKey> { key,keyAdmin},
                     ValidateIssuer = false,
                     ValidateAudience = false
 

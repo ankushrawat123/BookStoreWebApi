@@ -1,5 +1,6 @@
 ﻿using BuisnessLayer.Interface;
 using DatabaseLayer.Book;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
@@ -30,6 +31,7 @@ namespace BookstoreApi.Controllers
             books = database.GetCollection<Book>("books");
         }
 
+        [Authorize("Admin")]
         [HttpPost]
         [Route("AddBook")]
         public async Task<IActionResult> AddBook(BookPostModel bookPostModel)
@@ -83,6 +85,7 @@ namespace BookstoreApi.Controllers
             }
         }
 
+        [Authorize("Admin")]
         [HttpDelete]
         [Route("DeleteBook/{BookTitle}/{Author}")]
 
@@ -105,6 +108,7 @@ namespace BookstoreApi.Controllers
             }
         }
 
+        [Authorize("Admin")]
         [HttpPut]
         [Route("UpdateBook")]
 
